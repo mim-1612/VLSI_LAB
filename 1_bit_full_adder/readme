@@ -1,1 +1,49 @@
+# Full Adder 1-bit Using NAND Gates
+
+This project implements a **1-bit Full Adder using only NAND gate instances** in VHDL.
+
+## Overview
+
+A 1-bit Full Adder takes three 1-bit inputs:
+
+* `A` — First input
+* `B` — Second input
+* `Cin` — Carry input
+
+and produces two outputs:
+
+* `Sum` — Sum output
+* `Cout` — Carry output
+
+The Full Adder is designed using **NAND gates as structural components**. A total of **11 NAND gate instances** are used to generate the required `Sum` and `Cout` outputs.
+
+## Files
+
+```text
+Full_Adder_1bit/
+│
+├── NAND_gate.vhd
+├── NAND_gate_tb.vhd
+├── Full_Adder_1bit.vhd
+└── Full_Adder_1bit_tb.vhd
+```
+
+* `NAND_gate.vhd` — NAND gate implementation.
+* `NAND_gate_tb.vhd` — NAND gate testbench.
+* `Full_Adder_1bit.vhd` — 1-bit Full Adder using NAND gate instances.
+* `Full_Adder_1bit_tb.vhd` — Testbench for the Full Adder.
+
+## Tools Used
+
+* **VHDL**
+* **Xilinx ISE 14.7**
+* **ISim Simulator**
+
+## Simulation
+
+The Full Adder was functionally simulated using the **Xilinx ISE Simulator (ISim)**. All eight possible combinations of `A`, `B`, and `Cin` were tested, and the resulting `Sum` and `Cout` outputs were verified against the standard Full Adder truth table.
+
+## Result
+
+The simulation results successfully verified the correct operation of the NAND-gate-based **1-bit Full Adder**.
 
