@@ -1,0 +1,23 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity reg4 is
+    Port ( CLK   : in  STD_LOGIC;
+           RESET : in  STD_LOGIC;
+           D     : in  STD_LOGIC_VECTOR (3 downto 0);
+           Q     : out STD_LOGIC_VECTOR (3 downto 0));
+end reg4;
+
+architecture Behavioral of reg4 is
+begin
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if RESET = '1' then
+                Q <= "0000";
+            else
+                Q <= D;
+            end if;
+        end if;
+    end process;
+end Behavioral;

@@ -1,0 +1,30 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity accumulator4 is
+Port ( A : in STD_LOGIC_VECTOR (3 downto 0);
+B : in STD_LOGIC_VECTOR (3 downto 0);
+CLK : in STD_LOGIC;
+RESET : in STD_LOGIC;
+Q : out STD_LOGIC_VECTOR (3 downto 0));
+end accumulator4;
+
+architecture Structural of accumulator4 is
+component adder4
+Port ( A : in STD_LOGIC_VECTOR (3 downto 0);
+B : in STD_LOGIC_VECTOR (3 downto 0);
+S : out STD_LOGIC_VECTOR (3 downto 0));
+end component;
+
+component reg4
+Port ( CLK : in STD_LOGIC;
+RESET : in STD_LOGIC;
+D : in STD_LOGIC_VECTOR (3 downto 0);
+Q : out STD_LOGIC_VECTOR (3 downto 0));
+end component;
+
+signal sum : STD_LOGIC_VECTOR (3 downto 0);
+begin
+U1: adder4 port map (A => A, B => B, S => sum);
+U2: reg4 port map (CLK => CLK, RESET => RESET, D => sum, Q => Q);
+end Structural;
