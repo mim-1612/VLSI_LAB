@@ -1,0 +1,35 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Decodes opcode[11:8] with basic gate equations (AND, OR, NOT).
+-- LDI 0001, ADD 0010, NOT 0111, SHL 1000, JZ 1100. Anything else = NOP.
+entity control_unit is
+    port (
+        opcode  : in  std_logic_vector(3 downto 0);
+        z       : in  std_logic;
+        alu_sel : out std_logic_vector(1 downto 0);
+        acc_we  : out std_logic;
+        z_we    : out std_logic;
+        pc_load : out std_logic
+    );
+end control_unit;
+
+architecture rtl of control_unit is
+    signal is_ldi, is_add, is_not, is_shl, is_jz : std_logic;
+    signal writes_acc : std_logic;
+begin
+    -- instruction decoder
+    is_ldi <= (not opcode(3)) and (not opcode(2)) and (not opcode(1)) and opcode(0);          -- 0001
+    is_add <= (not opcode(3)) and (not opcode(2)) and opcode(1)       and (not opcode(0));    -- 0010
+    is_not <= (not opcode(3)) and opcode(2)       and opcode(1)       and opcode(0);          -- 0111
+    is_shl <= opcode(3)       and (not opcode(2)) and (not opcode(1)) and (not opcode(0));    -- 1000
+    is_jz  <= opcode(3)       and opcode(2)       and (not opcode(1)) and (not opcode(0));    -- 1100
+
+    -- control signals
+    writes_acc  <= is_ldi or is_add or is_not or is_shl;
+    acc_we      <= writes_acc;
+    z_we        <= writes_acc;          -- JZ and NOP leave Z unchanged
+    alu_sel(1)  <= is_not or is_shl;    -- LDI 00, ADD 01, NOT 10, SHL 11
+    alu_sel(0)  <= is_add or is_shl;
+    pc_load     <= is_jz and z;
+end rtl;

@@ -1,0 +1,18 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Step 2: Full adder = 2 half adders + 1 OR gate
+entity full_adder is
+    port (
+        a, b, cin : in  std_logic;
+        sum, cout : out std_logic
+    );
+end full_adder;
+
+architecture structural of full_adder is
+    signal s1, c1, c2 : std_logic;
+begin
+    ha1 : entity work.half_adder port map (a => a,  b => b,   sum => s1,  carry => c1);
+    ha2 : entity work.half_adder port map (a => s1, b => cin, sum => sum, carry => c2);
+    u_or : entity work.or_gate   port map (a => c1, b => c2,  y => cout);
+end structural;

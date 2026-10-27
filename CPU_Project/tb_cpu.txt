@@ -1,0 +1,71 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity tb_cpu is
+end tb_cpu;
+
+architecture sim of tb_cpu is
+    signal clk   : std_logic := '0';
+    signal reset : std_logic := '1';
+    signal q     : std_logic_vector(7 downto 0);
+    signal z     : std_logic;
+    signal pc    : std_logic_vector(3 downto 0);
+    signal done  : boolean := false;
+
+    constant T : time := 10 ns;
+begin
+    uut : entity work.cpu_top
+        port map (clk => clk, reset => reset, q => q, z => z, pc => pc);
+
+    -- clock
+    clk_proc : process
+    begin
+        while not done loop
+            clk <= '0'; wait for T/2;
+            clk <= '1'; wait for T/2;
+        end loop;
+        wait;
+    end process;
+
+    -- stimulus + self-check (values are those after each rising edge)
+    stim : process
+        type slv8_arr is array (1 to 7) of std_logic_vector(7 downto 0);
+        type int_arr  is array (1 to 7) of integer;
+        type sl_arr   is array (1 to 7) of std_logic;
+        constant ACC_EXP : slv8_arr := (x"FF", x"00", x"00", x"11", x"22", x"22", x"44");
+        constant Z_EXP   : sl_arr   := ('0',   '1',   '1',   '0',   '0',   '0',   '0');
+        constant PC_EXP  : int_arr  := (1, 2, 5, 6, 7, 8, 9);
+        variable errors  : integer := 0;
+    begin
+        -- Cycle 0: RESET = 1 for one rising edge
+        reset <= '1';
+        wait until rising_edge(clk);
+        wait for 1 ns;
+        assert q = x"00" and z = '1' and unsigned(pc) = 0
+            report "RESET check FAILED" severity error;
+        if not (q = x"00" and z = '1' and unsigned(pc) = 0) then errors := errors + 1; end if;
+        reset <= '0';
+
+        -- Cycles 1..7: one rising edge per instruction
+        for i in 1 to 7 loop
+            wait until rising_edge(clk);
+            wait for 1 ns;
+            if q /= ACC_EXP(i) or z /= Z_EXP(i) or unsigned(pc) /= PC_EXP(i) then
+                errors := errors + 1;
+                report "Cycle " & integer'image(i) & " FAILED" severity error;
+            else
+                report "Cycle " & integer'image(i) & " OK" severity note;
+            end if;
+        end loop;
+
+        if errors = 0 then
+            report "ALL TESTS PASSED" severity note;
+        else
+            report "TEST FAILED, errors = " & integer'image(errors) severity error;
+        end if;
+
+        done <= true;
+        wait;
+    end process;
+end sim;

@@ -1,0 +1,44 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- ALU for Set 9: LDI, ADD, NOT, SHL
+-- sel = 00 : LDI  -> result = operand (b)
+-- sel = 01 : ADD  -> result = a + b          (adder8 from full adders)
+-- sel = 10 : NOT  -> result = not a          (8 NOT gates)
+-- sel = 11 : SHL  -> result = a shifted left by 1, 0 enters LSB (wiring only)
+entity alu is
+    port (
+        a      : in  std_logic_vector(7 downto 0);  -- ACC
+        b      : in  std_logic_vector(7 downto 0);  -- operand
+        sel    : in  std_logic_vector(1 downto 0);
+        result : out std_logic_vector(7 downto 0)
+    );
+end alu;
+
+architecture structural of alu is
+    signal sum_s : std_logic_vector(7 downto 0);
+    signal not_s : std_logic_vector(7 downto 0);
+    signal shl_s : std_logic_vector(7 downto 0);
+begin
+    -- ADD
+    u_add : entity work.adder8 port map (a => a, b => b, s => sum_s);
+
+    -- NOT: one NOT gate per bit
+    gen_not : for i in 0 to 7 generate
+        u_not : entity work.not_gate port map (a => a(i), y => not_s(i));
+    end generate;
+
+    -- SHL: just wiring
+    shl_s <= a(6 downto 0) & '0';
+
+    -- 4-to-1 MUX controlled by the Control Unit
+    process (sel, b, sum_s, not_s, shl_s)
+    begin
+        case sel is
+            when "00"   => result <= b;
+            when "01"   => result <= sum_s;
+            when "10"   => result <= not_s;
+            when others => result <= shl_s;
+        end case;
+    end process;
+end structural;

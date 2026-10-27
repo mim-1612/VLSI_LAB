@@ -1,0 +1,36 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+-- 4-bit program counter, synchronous active-high reset
+entity pc is
+    port (
+        clk     : in  std_logic;
+        reset   : in  std_logic;
+        pc_load : in  std_logic;                     -- 1 = jump
+        addr_in : in  std_logic_vector(3 downto 0);  -- jump target
+        pc_out  : out std_logic_vector(3 downto 0)
+    );
+end pc;
+
+architecture rtl of pc is
+    signal pc_reg : std_logic_vector(3 downto 0) := "0000";
+    signal pc_inc : std_logic_vector(3 downto 0);
+begin
+    pc_inc <= std_logic_vector(unsigned(pc_reg) + 1);
+
+    process (clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                pc_reg <= "0000";
+            elsif pc_load = '1' then
+                pc_reg <= addr_in;
+            else
+                pc_reg <= pc_inc;
+            end if;
+        end if;
+    end process;
+
+    pc_out <= pc_reg;
+end rtl;

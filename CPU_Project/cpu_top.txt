@@ -1,0 +1,49 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Top-level Mini 8-bit Accumulator CPU (Set 9: LDI, ADD, NOT, SHL, JZ)
+entity cpu_top is
+    port (
+        clk   : in  std_logic;
+        reset : in  std_logic;
+        q     : out std_logic_vector(7 downto 0);   -- ACC
+        z     : out std_logic;                      -- Z flag
+        pc    : out std_logic_vector(3 downto 0)    -- PC (for checking)
+    );
+end cpu_top;
+
+architecture structural of cpu_top is
+    signal pc_s      : std_logic_vector(3 downto 0);
+    signal instr_s   : std_logic_vector(11 downto 0);
+    signal alu_res   : std_logic_vector(7 downto 0);
+    signal acc_s     : std_logic_vector(7 downto 0);
+    signal z_s       : std_logic;
+    signal alu_sel_s : std_logic_vector(1 downto 0);
+    signal acc_we_s  : std_logic;
+    signal z_we_s    : std_logic;
+    signal pc_load_s : std_logic;
+begin
+    u_pc : entity work.pc
+        port map (clk => clk, reset => reset, pc_load => pc_load_s,
+                  addr_in => instr_s(3 downto 0), pc_out => pc_s);
+
+    u_rom : entity work.program_rom
+        port map (addr => pc_s, instr => instr_s);
+
+    u_ctrl : entity work.control_unit
+        port map (opcode => instr_s(11 downto 8), z => z_s,
+                  alu_sel => alu_sel_s, acc_we => acc_we_s,
+                  z_we => z_we_s, pc_load => pc_load_s);
+
+    u_alu : entity work.alu
+        port map (a => acc_s, b => instr_s(7 downto 0),
+                  sel => alu_sel_s, result => alu_res);
+
+    u_acc : entity work.acc_z
+        port map (clk => clk, reset => reset, acc_we => acc_we_s,
+                  z_we => z_we_s, d => alu_res, q => acc_s, z => z_s);
+
+    q  <= acc_s;
+    z  <= z_s;
+    pc <= pc_s;
+end structural;
